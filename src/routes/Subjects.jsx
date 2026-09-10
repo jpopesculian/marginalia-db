@@ -46,7 +46,7 @@ export default function Subjects({ data }) {
       <div className="column">
         <div className="title-block" style={{ marginBottom: '1.1rem' }}>
           <h1 className="letter-initial">
-            <img src={`/initials/${letter}.svg`} alt={letter} width="120" height="96" />
+            <img src={`${import.meta.env.BASE_URL}initials/${letter}.svg`} alt={letter} width="120" height="96" />
           </h1>
         </div>
 

@@ -172,7 +172,7 @@ export function PlateGrid({ figures }) {
           <Link className="plate-card" to={`/figure/${f.id}`}>
             <figure>
               <div className="frame">
-                <img src={`/${f.image}`} alt={plateAlt(f)} loading="lazy" />
+                <img src={`${import.meta.env.BASE_URL}${f.image}`} alt={plateAlt(f)} loading="lazy" />
               </div>
               <figcaption>
                 <b>

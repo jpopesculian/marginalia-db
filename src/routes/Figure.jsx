@@ -71,7 +71,7 @@ export default function Figure({ data }) {
         <Crumbs items={[{ label: 'Plates', to: '/figures' }, { label: `Fig. ${fig.number}${fig.suffix}` }]} />
 
         <div className="plate-full">
-          <img src={`/${fig.image}`} alt={plateAlt(fig)} />
+          <img src={`${import.meta.env.BASE_URL}${fig.image}`} alt={plateAlt(fig)} />
         </div>
 
         <p className="printed" style={{ marginTop: '1.2rem' }}>

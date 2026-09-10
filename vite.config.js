@@ -10,8 +10,11 @@ const server = {
   allowedHosts: ['.ts.net', 'localhost'],
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
+  // GitHub Pages serves project sites below /<repository>/. Keep local
+  // development at /, while allowing CI to provide the deployed base path.
+  base: command === 'build' ? (process.env.BASE_PATH || '/') : '/',
   plugins: [react()],
   server,
   preview: server,
-})
+}))

@@ -9,7 +9,7 @@ export function loadData() {
   cache = (async () => {
     const [subjects, manuscripts, figures, iiif, meta] = await Promise.all(
       ['subjects', 'manuscripts', 'figures', 'iiif', 'meta'].map((n) =>
-        fetch(`/data/${n}.json`).then((r) => {
+        fetch(`${import.meta.env.BASE_URL}data/${n}.json`).then((r) => {
           if (!r.ok) throw new Error(`${n}.json failed to load (${r.status})`)
           return r.json()
         })

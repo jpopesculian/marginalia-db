@@ -66,7 +66,7 @@ export default function Home({ data }) {
               style={{ animationDelay: `${120 + i * 45}ms` }}
               title={f.caption || f.subjects.join('; ')}
             >
-              <img src={`/${f.image}`} alt={f.caption || f.subjects.join('; ')} />
+              <img src={`${import.meta.env.BASE_URL}${f.image}`} alt={f.caption || f.subjects.join('; ')} />
             </Link>
           ))}
         </div>
