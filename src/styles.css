@@ -1,0 +1,964 @@
+/* ---------------------------------------------------------------------------
+   Display type is Grenze Gotisch, loaded from Google Fonts, for the wordmark and
+   the hero. The alphabet capitals on the Motifs page are drawn artwork in
+   public/initials, not a webfont — see `npm run initials`.
+--------------------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------------------
+   Marginalia
+
+   The page is built like the leaf it describes: a measured text block with a
+   working margin beside it. Colour follows the scribe's own two-pigment system
+   for structure — minium red for the motif, azurite blue for the book and the
+   place it lives — over a bone ground that lets 1966 photogravure plates sit
+   without a colour cast. One family, Spectral, across the whole thing.
+--------------------------------------------------------------------------- */
+
+:root {
+  --page: #f4f3ee;
+  --page-deep: #eae7dd;
+  --well: #edebe3;
+  --ink: #2b2620;
+  --faded: #736c63;
+  --rule: #d9d4c7;
+  --rubric: #a5372b;
+  --rubric-soft: #c8705f;
+  --azure: #2e4a6b;
+
+  --measure: 40rem;
+  --margin-col: 13rem;
+  --gutter: 2.75rem;
+
+  --step--2: 0.72rem;
+  --step--1: 0.83rem;
+  --step-0: 1rem;
+  --step-1: 1.18rem;
+  --step-2: 1.5rem;
+  --step-3: 2rem;
+  --step-4: 2.9rem;
+
+  --serif: 'Spectral', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --display: 'Grenze Gotisch', var(--serif);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.6;
+  font-variant-numeric: oldstyle-num;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  letter-spacing: -0.005em;
+}
+
+.wordmark,
+.hero h1 {
+  font-family: var(--display);
+  letter-spacing: 0.005em;
+}
+
+p {
+  margin: 0 0 0.9em;
+  max-width: var(--measure);
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--rule);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.16em;
+  transition: text-decoration-color 120ms ease, color 120ms ease;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
+}
+
+:focus-visible {
+  outline: 2px solid var(--rubric);
+  outline-offset: 3px;
+  border-radius: 1px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* --- shell ---------------------------------------------------------------- */
+
+.shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--page);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.masthead-inner {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 0.8rem 1.6rem;
+  display: flex;
+  align-items: center;
+  gap: var(--gutter);
+}
+
+.wordmark {
+  font-size: 1.72rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--ink);
+  flex: none;
+  line-height: 1.1;
+}
+
+.wordmark:hover {
+  color: var(--rubric);
+}
+
+.masthead nav {
+  display: flex;
+  gap: 1.4rem;
+  font-size: var(--step--1);
+  margin-left: auto;
+}
+
+.masthead nav a {
+  text-decoration: none;
+  color: var(--faded);
+  padding-bottom: 2px;
+  border-bottom: 1.5px solid transparent;
+}
+
+.masthead nav a:hover {
+  color: var(--ink);
+}
+
+.masthead nav a.active {
+  color: var(--ink);
+  border-bottom-color: var(--rubric);
+}
+
+.leaf {
+  max-width: 74rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2.6rem 1.6rem 5rem;
+  display: grid;
+  grid-template-columns: var(--margin-col) minmax(0, 1fr);
+  gap: var(--gutter);
+  align-items: start;
+  flex: 1;
+}
+
+.leaf.wide {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.margin {
+  position: sticky;
+  top: 4.4rem;
+  font-size: var(--step--1);
+  color: var(--faded);
+  line-height: 1.5;
+}
+
+.margin h2 {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+
+.margin + * {
+  min-width: 0;
+}
+
+.column {
+  min-width: 0;
+}
+
+/* --- shared text bits ----------------------------------------------------- */
+
+.lede {
+  font-size: var(--step-1);
+  color: var(--faded);
+  max-width: 34rem;
+  font-weight: 300;
+}
+
+.printed {
+  font-style: italic;
+  color: var(--faded);
+  max-width: var(--measure);
+  border-left: 2px solid var(--rule);
+  padding-left: 1rem;
+  margin: 1.1rem 0 1.6rem;
+}
+
+.count {
+  color: var(--faded);
+  font-size: var(--step--1);
+}
+
+.rubric {
+  color: var(--rubric);
+}
+
+.divider {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2.4rem 0 1.6rem;
+  max-width: var(--measure);
+}
+
+.section-head {
+  font-size: var(--step-1);
+  font-weight: 600;
+  margin: 2.4rem 0 0.9rem;
+}
+
+/* The Motifs page heading is one letter, drawn as an illuminated versal. Every
+   initial shares one viewBox height, so setting the height alone keeps them all
+   the same visual size while each keeps its own width. */
+.letter-initial {
+  line-height: 0;
+}
+
+.letter-initial img {
+  height: 6rem;
+  width: auto;
+  display: block;
+}
+
+.section-head:first-child {
+  margin-top: 0;
+}
+
+.empty {
+  color: var(--faded);
+  font-style: italic;
+  max-width: 32rem;
+}
+
+/* --- home ----------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  border-bottom: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.hero-text {
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.6rem 2.2rem;
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 7vw, 5rem);
+  font-weight: 400;
+  max-width: 15ch;
+  line-height: 1.04;
+}
+
+.hero h1 em {
+  font-style: italic;
+  font-weight: 300;
+}
+
+.hero .lede {
+  margin-top: 1.1rem;
+  max-width: 38rem;
+}
+
+/* The plates run along the foot of the screen because that is where they run
+   along the foot of a leaf: the bas-de-page. */
+.bas-de-page {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 172px;
+  padding: 0 1px;
+  background: var(--page-deep);
+  border-top: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.bas-de-page a {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+  display: block;
+  position: relative;
+  filter: grayscale(1) contrast(1.05);
+  opacity: 0;
+  animation: settle 700ms ease-out forwards;
+}
+
+.bas-de-page img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.bas-de-page a:hover {
+  filter: grayscale(0.15) contrast(1.05);
+}
+
+.bas-de-page a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1.5px transparent;
+  transition: box-shadow 120ms ease;
+}
+
+.bas-de-page a:hover::after,
+.bas-de-page a:focus-visible::after {
+  box-shadow: inset 0 0 0 1.5px var(--rubric);
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bas-de-page a {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+.tally {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 2.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--step--1);
+  color: var(--faded);
+}
+
+.tally b {
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: lining-num;
+}
+
+/* --- search --------------------------------------------------------------- */
+
+.search-field {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  border-bottom: 1.5px solid var(--ink);
+  max-width: 30rem;
+  padding-bottom: 0.35rem;
+}
+
+.search-field input {
+  font: inherit;
+  font-size: var(--step-2);
+  font-weight: 300;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  outline: 0;
+  width: 100%;
+  padding: 0;
+}
+
+.search-field input::placeholder {
+  color: #a49c92;
+  font-style: italic;
+}
+
+.search-hint {
+  font-size: var(--step--1);
+  color: var(--faded);
+  margin-top: 0.6rem;
+}
+
+.search-hint a {
+  color: var(--rubric);
+}
+
+/* --- index lists ---------------------------------------------------------- */
+
+.entry-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: var(--measure);
+}
+
+.entry {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.entry:last-child {
+  border-bottom: 0;
+}
+
+.entry-head {
+  text-decoration: none;
+  font-size: var(--step-0);
+}
+
+.entry-head:hover {
+  color: var(--rubric);
+}
+
+.entry-path {
+  color: var(--faded);
+  font-size: var(--step--1);
+}
+
+.entry-path .sep {
+  color: var(--rubric-soft);
+  padding: 0 0.3em;
+}
+
+.entry-meta {
+  color: var(--faded);
+  font-size: var(--step--1);
+  margin-top: 0.1rem;
+}
+
+.letter-rail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin-bottom: 1.6rem;
+}
+
+.letter-rail a {
+  text-decoration: none;
+  color: var(--faded);
+  font-size: var(--step-0);
+  padding: 0.05rem 0.3rem;
+  border-radius: 2px;
+}
+
+.letter-rail a:hover {
+  color: var(--ink);
+  background: var(--well);
+}
+
+.letter-rail a.active {
+  background: var(--rubric);
+  color: var(--page);
+}
+
+/* --- subject tree --------------------------------------------------------- */
+
+.tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: var(--measure);
+}
+
+.tree ul {
+  list-style: none;
+  margin: 0 0 0 1.15rem;
+  padding: 0;
+  border-left: 1px solid var(--rule);
+}
+
+.tree li {
+  padding: 0.12rem 0;
+}
+
+.tree ul li {
+  padding-left: 0.85rem;
+  position: relative;
+}
+
+/* The paraph is doing real work here: it marks a nested heading, exactly as it
+   does in the printed index. */
+.tree ul li::before {
+  content: '¶';
+  position: absolute;
+  left: -0.52rem;
+  top: 0.12rem;
+  color: var(--rubric-soft);
+  font-size: 0.72rem;
+  background: var(--page);
+  line-height: 1.9;
+}
+
+.tree a {
+  text-decoration: none;
+}
+
+.tree a:hover {
+  color: var(--rubric);
+}
+
+.tree .lvl-0 {
+  font-weight: 600;
+  font-size: var(--step-1);
+  margin-top: 0.55rem;
+  display: inline-block;
+}
+
+.tree .refs {
+  color: var(--faded);
+  font-size: var(--step--1);
+  font-variant-numeric: lining-num;
+  margin-left: 0.6rem;
+  white-space: nowrap;
+}
+
+.tree .expander {
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-left: 1.1rem;
+  cursor: pointer;
+  color: var(--rubric);
+  font-size: var(--step--1);
+  white-space: nowrap;
+}
+
+.tree .expander:hover {
+  text-decoration: underline;
+}
+
+/* --- citations ------------------------------------------------------------ */
+
+.citations {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 46rem;
+}
+
+.citation {
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+}
+
+.citation:last-child {
+  border-bottom: 0;
+}
+
+.cite-ms {
+  color: var(--azure);
+  text-decoration-color: rgba(46, 74, 107, 0.32);
+  font-weight: 500;
+}
+
+.cite-folio {
+  font-variant-numeric: lining-num;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.cite-note {
+  color: var(--faded);
+  font-style: italic;
+  flex: 1 1 14rem;
+  min-width: 0;
+}
+
+.cite-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  font-size: var(--step--1);
+  white-space: nowrap;
+}
+
+.folio-link {
+  color: var(--rubric);
+  text-decoration-color: rgba(165, 55, 43, 0.35);
+}
+
+.folio-link.approximate {
+  color: var(--faded);
+}
+
+.plate-link {
+  color: var(--faded);
+}
+
+.inherited {
+  color: var(--faded);
+  font-size: var(--step--2);
+  font-style: italic;
+}
+
+/* --- manuscripts ---------------------------------------------------------- */
+
+.ms-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ms-row {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.3rem 1.5rem;
+  align-items: baseline;
+}
+
+.ms-name {
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--azure);
+}
+
+.ms-name:hover {
+  color: var(--rubric);
+}
+
+.ms-where {
+  color: var(--faded);
+  font-size: var(--step--1);
+  grid-column: 1;
+}
+
+.ms-flags {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  text-align: right;
+  font-size: var(--step--1);
+  color: var(--faded);
+  line-height: 1.7;
+}
+
+.flag-iiif {
+  color: var(--rubric);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.4rem;
+}
+
+.filters button {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0.2rem 0.65rem;
+  font-size: var(--step--1);
+  color: var(--faded);
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+.filters button:hover {
+  border-color: var(--faded);
+  color: var(--ink);
+}
+
+.filters button[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--page);
+}
+
+.filters button:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.filters button:disabled:hover {
+  border-color: var(--rule);
+  color: var(--faded);
+}
+
+.filter-count {
+  margin-left: 0.45rem;
+  font-variant-numeric: lining-num;
+  font-size: var(--step--2);
+  color: var(--faded);
+}
+
+.filters button[aria-pressed='true'] .filter-count {
+  color: rgba(244, 243, 238, 0.66);
+}
+
+.filters .filter-clear {
+  border-color: transparent;
+  color: var(--rubric);
+  padding-left: 0.35rem;
+}
+
+.filters .filter-clear:hover {
+  border-color: transparent;
+  color: var(--rubric);
+  text-decoration: underline;
+}
+
+.facts {
+  margin: 0 0 1.6rem;
+  max-width: var(--measure);
+}
+
+.facts div {
+  display: grid;
+  grid-template-columns: 8.5rem minmax(0, 1fr);
+  gap: 0 1rem;
+  padding: 0.28rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.facts dt {
+  color: var(--faded);
+  font-size: var(--step--1);
+}
+
+.facts dd {
+  margin: 0;
+}
+
+/* --- plates --------------------------------------------------------------- */
+
+.plate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+  gap: 1.6rem 1.2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.plate-card {
+  text-decoration: none;
+  display: block;
+}
+
+.plate-card figure {
+  margin: 0;
+}
+
+.plate-card .frame {
+  background: var(--page-deep);
+  border: 1px solid var(--rule);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plate-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.plate-card:hover .frame {
+  border-color: var(--rubric);
+}
+
+.plate-card figcaption {
+  font-size: var(--step--1);
+  color: var(--faded);
+  margin-top: 0.4rem;
+  line-height: 1.4;
+}
+
+.plate-card figcaption b {
+  color: var(--ink);
+  font-weight: 500;
+  font-variant-numeric: lining-num;
+}
+
+.plate-full {
+  background: var(--page-deep);
+  border: 1px solid var(--rule);
+  padding: 1.1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.plate-full img {
+  max-width: 100%;
+  max-height: 74vh;
+  display: block;
+}
+
+/* --- misc ----------------------------------------------------------------- */
+
+.crumbs {
+  font-size: var(--step--1);
+  color: var(--faded);
+  margin-bottom: 0.7rem;
+}
+
+.crumbs a {
+  color: var(--faded);
+}
+
+.crumbs a:hover {
+  color: var(--ink);
+}
+
+.crumbs .sep {
+  color: var(--rubric-soft);
+  padding: 0 0.35em;
+}
+
+.title-block h1 {
+  font-size: var(--step-3);
+  font-weight: 500;
+  max-width: 22ch;
+}
+
+.title-block .ancestry {
+  color: var(--faded);
+  font-weight: 300;
+}
+
+.title-block .sub {
+  color: var(--faded);
+  margin-top: 0.35rem;
+}
+
+.booting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--faded);
+  font-style: italic;
+}
+
+.xref {
+  max-width: var(--measure);
+  margin-bottom: 0.35rem;
+}
+
+.xref .kind {
+  color: var(--faded);
+  font-style: italic;
+}
+
+.pill {
+  font-size: var(--step--2);
+  color: var(--faded);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0.05rem 0.4rem;
+  white-space: nowrap;
+  margin-left: 0.45rem;
+}
+
+@media (max-width: 620px) {
+  .masthead-inner {
+    flex-wrap: wrap;
+    gap: 0.2rem 1rem;
+    padding: 0.7rem 1.1rem;
+  }
+
+  .masthead nav {
+    margin-left: 0;
+    width: 100%;
+    gap: 1.1rem;
+  }
+
+  .leaf,
+  .hero-text {
+    padding-left: 1.1rem;
+    padding-right: 1.1rem;
+  }
+}
+
+@media (max-width: 860px) {
+  .leaf {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 1.8rem;
+  }
+
+  .margin {
+    position: static;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1rem;
+  }
+
+  .hero h1 {
+    font-size: 2.7rem;
+  }
+
+  .hero-text {
+    padding-top: 2.6rem;
+  }
+
+  .bas-de-page {
+    height: 132px;
+  }
+
+  /* Twelve plates at phone width are 32px each and read as noise. */
+  .bas-de-page a:nth-child(n + 6) {
+    display: none;
+  }
+
+  .citation {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cite-actions {
+    margin-left: 0;
+  }
+
+  .facts div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
