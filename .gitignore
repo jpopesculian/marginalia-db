@@ -5,3 +5,4 @@ public/figures
 *.local
 .playwright-mcp/
 fonts/
+.probe/

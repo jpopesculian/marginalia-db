@@ -1,0 +1,172 @@
+{
+  "_comment": [
+    "Manifests that label canvases with an image counter rather than a folio.",
+    "For a straightforwardly scanned book the two are related by",
+    "    canvas = 2 * folio + (verso ? 1 : 0) + offset",
+    "where the offset counts the covers and flyleaves shot before f.1r.",
+    "Nothing in these manifests states it, so each offset here was read off the",
+    "foliation pencilled on the leaf itself, and confirmed at a second leaf far",
+    "enough away that any unnumbered insert in between would have shifted it.",
+    "Add an entry only with two confirmed checks: a wrong offset mislinks every",
+    "folio in the manuscript silently, which is far worse than no link at all.",
+    "Probe with: node scripts/foliation-probe.mjs \"<manuscript id>\" <canvas> ..."
+  ],
+  "BBR 9391": {
+    "offset": 0,
+    "checks": [
+      [
+        8,
+        "4"
+      ],
+      [
+        322,
+        "161"
+      ]
+    ],
+    "note": "KBR labels these Seq. N. Pencil foliation upper right."
+  },
+  "W. 88": {
+    "offset": 4,
+    "checks": [
+      [
+        60,
+        "28"
+      ],
+      [
+        392,
+        "194"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N. Pencil foliation upper right of the leaf, left of the colour chart."
+  },
+  "W. 87": {
+    "offset": 2,
+    "checks": [
+      [
+        60,
+        "29"
+      ],
+      [
+        224,
+        "111"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N."
+  },
+  "W. 37": {
+    "offset": 2,
+    "checks": [
+      [
+        60,
+        "29"
+      ],
+      [
+        386,
+        "192"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N."
+  },
+  "W. 82": {
+    "offset": 2,
+    "checks": [
+      [
+        60,
+        "29"
+      ],
+      [
+        424,
+        "211"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N."
+  },
+  "W. 85": {
+    "offset": 2,
+    "checks": [
+      [
+        60,
+        "29"
+      ],
+      [
+        232,
+        "115"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N."
+  },
+  "W. 90": {
+    "offset": 2,
+    "checks": [
+      [
+        60,
+        "29"
+      ],
+      [
+        434,
+        "216"
+      ]
+    ],
+    "note": "Stanford/Digital Walters labels these Page N."
+  },
+  "BBR 9157": {
+    "offset": 6,
+    "checks": [
+      [
+        400,
+        "197"
+      ],
+      [
+        932,
+        "463"
+      ]
+    ],
+    "note": "KBR labels these Seq. N."
+  },
+  "Lambeth 233": {
+    "offset": 8,
+    "checks": [
+      [
+        300,
+        "146"
+      ],
+      [
+        472,
+        "232"
+      ]
+    ],
+    "note": "Lambeth Palace labels these by image number. Pencil foliation upper right."
+  },
+  "Jacquemart 1": {
+    "offset": 4,
+    "checks": [
+      [
+        200,
+        "98"
+      ],
+      [
+        286,
+        "141"
+      ]
+    ],
+    "note": "Institut de France labels these by image number. The scan is low resolution; read the corner at native size (region/full, no upscaling) rather than from a downscaled page."
+  },
+  "St. Omer 5": {
+    "offset": 5,
+    "checks": [
+      [
+        301,
+        "148"
+      ],
+      [
+        567,
+        "281"
+      ]
+    ],
+    "note": "Odd offset, so even canvases are versos and carry no foliation. Probing canvas 300 found a blank corner; the number is on 301."
+  },
+  "_rejected": {
+    "BBR 10607": "Offset is 2 at f.99 (canvas 200) but 4 at f.239 (canvas 482): an unnumbered leaf between them breaks the linear relation, so no single offset is right.",
+    "Princeton 44-18": "795 canvases for 205 folios, nearly four per leaf. The scan holds detail shots as well as openings, so folios do not map to a fixed stride."
+  }
+}

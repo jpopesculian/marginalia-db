@@ -8,6 +8,7 @@
     "verify-links": "node scripts/verify-links.mjs",
     "fonts": "node scripts/install-fonts.mjs",
     "initials": "node scripts/extract-initials.mjs",
+    "foliation-probe": "node scripts/foliation-probe.mjs",
     "prepare-data": "node scripts/build-data.mjs",
     "dev": "npm run prepare-data && vite",
     "build": "npm run prepare-data && vite build",

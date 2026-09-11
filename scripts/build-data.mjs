@@ -20,6 +20,28 @@ try {
   console.warn('no database/iiif_index.json — run `npm run harvest` to enable folio links')
 }
 
+// Manifests that number images rather than naming leaves, with a verified
+// offset between the two. See database/foliation.json for how each was checked.
+let foliation = {}
+try {
+  foliation = await read('database/foliation.json')
+} catch {}
+
+function syntheticFolios(record, manifest) {
+  const entry = foliation[record?.manuscript_id]
+  if (!entry || typeof entry.offset !== 'number') return null
+  const count = manifest.idx.canvasCount
+  if (!count) return null
+  const folios = {}
+  for (let f = 1; ; f++) {
+    const recto = 2 * f + entry.offset
+    if (recto >= count) break
+    folios[`${f}r`] = recto
+    if (recto + 1 < count) folios[`${f}v`] = recto + 1
+  }
+  return Object.keys(folios).length ? folios : null
+}
+
 const digitizedById = new Map(digitized.map((d) => [d.manuscript_id, d]))
 
 // Manifests are ranked so that whole-book scans win over selected-leaf ones:
@@ -45,7 +67,10 @@ const outManuscripts = manuscripts.map((m) => {
 
   const folios = {}
   manifests.forEach((man, mi) => {
-    for (const [token, canvasIdx] of Object.entries(man.idx.folios || {})) {
+    // A manifest that names its leaves always wins; the offset is only a model.
+    const named = man.idx.folios || {}
+    const source = Object.keys(named).length ? named : syntheticFolios(dig, man) || {}
+    for (const [token, canvasIdx] of Object.entries(source)) {
       if (!(token in folios)) folios[token] = [mi, canvasIdx]
     }
   })
@@ -182,6 +207,7 @@ const meta = {
   manuscripts: outManuscripts.length,
   figures: outFigures.length,
   manuscriptsWithIiif: Object.keys(iiif).length,
+  foliationOffsets: Object.keys(foliation).filter((k) => !k.startsWith('_')).length,
   citedFolios,
   resolvedFolios,
   builtAt: new Date().toISOString().slice(0, 10),

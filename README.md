@@ -46,7 +46,8 @@ manuscript-level link and the interface says why.
 | Manifests indexed | 151 of 151 |
 | Manifests with folio labels | 98 |
 | Manuscripts openable | 126 of 232 |
-| Citations that open the exact leaf | 4,206 of 13,200 |
+| Citations that open the exact leaf | 5,533 of 13,200 |
+| Verified foliation offsets | 11 |
 
 Most labels are Arabic, but Gallica foliates some manuscripts in Roman — `Ir`,
 `Iv`, … `CLXIIIv`. Those are read per manifest rather than per label, because
@@ -63,9 +64,59 @@ Where the remaining citations go unlinked:
 | Labels carry no folio at all — "NP", an empty "f.", a title | 7 |
 | Roman foliation | fixed |
 
-An image counter cannot be turned into a folio without a foliation table the
-library does not publish, and guessing an offset would link confidently to the
-wrong page.
+### Image counters
+
+An image counter is not a folio, but for a straightforwardly scanned book the two
+are related by
+
+```
+canvas = 2 * folio + (verso ? 1 : 0) + offset
+```
+
+where the offset counts the covers and flyleaves shot before f.1r. Nothing in the
+manifest states it, so each offset in `database/foliation.json` was read off the
+foliation pencilled on the leaf itself and then confirmed at a second leaf far
+enough away that any unnumbered insert between them would have shifted it.
+
+```sh
+npm run foliation-probe "W. 88" 60 392
+```
+
+fetches the upper corner of those canvases so the number can be read.
+
+Add an entry only with two confirmed checks, far enough apart to span the cited
+range. A wrong offset mislinks every folio in the manuscript silently, which is
+far worse than no link.
+
+That guard earns its keep. Every manuscript under `_rejected` failed it for a
+different reason:
+
+- **BBR 10607** reads as offset 2 at f.99 and offset 4 at f.239. An unnumbered
+  leaf between them means no single offset is right.
+- **Princeton 44-18** holds 795 canvases for 205 folios, nearly four per leaf,
+  because the scan includes detail shots. A fixed stride cannot describe it.
+
+Eleven other sequence-only manifests hold fewer canvases than twice their highest
+cited folio, so they are partial scans rather than whole books.
+
+Two things make the corner hard to find, and both cost me a wrong conclusion
+before I spotted them:
+
+- **Read at the image's native size** — `region/full`, no upscaling — not from a
+  downscaled page. Jacquemart 1 looked unreadable at 1500px wide and was
+  perfectly legible cropped at full resolution.
+- **Foliation is written on rectos.** If the offset is odd, even canvases are
+  versos with a blank corner. St. Omer 5 has offset 5: canvas 300 shows nothing,
+  canvas 301 reads 148. A blank corner means try the next canvas, not that the
+  manuscript is unfoliated.
+
+The ratio of canvases to highest cited folio is a cheap first filter: close to
+2.0 means a plain front-to-back scan, and much above that means detail shots or
+inserts worth checking before spending fetches.
+
+`npm run verify-links` skips manuscripts that use an offset: their canvas labels
+carry no folio, which is why they needed an offset in the first place. The leaf
+photographs recorded in `checks` are their verification.
 
 Links open the [Universal Viewer](https://universalviewer.dev) with the manifest
 and, where resolved, a `cv` canvas index.
