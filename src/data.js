@@ -1,20 +1,37 @@
-// One boot load of the four prepared files, then every index the app needs is
-// derived in memory. Nothing here fetches again.
+// Two loads, not one. The home page needs meta, manuscripts and figures — a
+// tenth of the payload — so those are fetched separately and the first screen
+// paints without waiting on the 4.6 MB index. Every request starts at the same
+// moment; only the resolving is staged. Nothing fetches twice.
 import { folioLink } from './iiif.js'
 
+let shellCache = null
 let cache = null
+
+const fetchJson = (name) =>
+  fetch(`${import.meta.env.BASE_URL}data/${name}.json`).then((r) => {
+    if (!r.ok) throw new Error(`${name}.json failed to load (${r.status})`)
+    return r.json()
+  })
+
+// Enough for the home page: the counts, the plates band, and the starred
+// manuscripts. No headings, so no waiting for the index.
+export function loadShell() {
+  if (shellCache) return shellCache
+  shellCache = Promise.all([fetchJson('meta'), fetchJson('manuscripts'), fetchJson('figures')]).then(
+    ([meta, manuscripts, figures]) => ({ meta, manuscripts, figures })
+  )
+  return shellCache
+}
 
 export function loadData() {
   if (cache) return cache
   cache = (async () => {
-    const [subjects, manuscripts, figures, iiif, meta] = await Promise.all(
-      ['subjects', 'manuscripts', 'figures', 'iiif', 'meta'].map((n) =>
-        fetch(`${import.meta.env.BASE_URL}data/${n}.json`).then((r) => {
-          if (!r.ok) throw new Error(`${n}.json failed to load (${r.status})`)
-          return r.json()
-        })
-      )
-    )
+    const [shell, subjects, iiif] = await Promise.all([
+      loadShell(),
+      fetchJson('subjects'),
+      fetchJson('iiif'),
+    ])
+    const { meta, manuscripts, figures } = shell
 
     const subjectById = new Map(subjects.map((s) => [s.id, s]))
     const manuscriptById = new Map(manuscripts.map((m) => [m.id, m]))

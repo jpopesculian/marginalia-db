@@ -14,6 +14,11 @@ npm run dev        # http://localhost:8090
 `npm run dev` rebuilds `public/data` from `database/` first, so the app always
 serves what is currently in the raw files.
 
+The home page paints from a shell of `meta`, `manuscripts` and `figures` — about
+99 KB gzipped — rather than waiting for the 582 KB heading index. Every request
+starts at the same moment; only the resolving is staged. Pages that read headings
+still wait for the index.
+
 The dev server binds every interface and accepts any `*.ts.net` hostname, so it
 is reachable over Tailscale. That also exposes port 8090 on every other
 interface, including any public IP the machine has. Narrow `server.host` in

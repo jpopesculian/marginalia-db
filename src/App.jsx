@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Link, Route, Routes, useLocation } from 'react-router-dom'
-import { loadData } from './data.js'
+import { loadData, loadShell } from './data.js'
 import Home from './routes/Home.jsx'
 import Subjects from './routes/Subjects.jsx'
 import Subject from './routes/Subject.jsx'
@@ -12,11 +12,13 @@ import Search from './routes/Search.jsx'
 
 export default function App() {
   const [data, setData] = useState(null)
+  const [shell, setShell] = useState(null)
   const [error, setError] = useState(null)
   const location = useLocation()
 
   useEffect(() => {
-    loadData().then(setData, (e) => setError(e))
+    loadShell().then(setShell, setError)
+    loadData().then(setData, setError)
   }, [])
 
   useEffect(() => {
@@ -47,23 +49,31 @@ export default function App() {
             <p>Run <code>npm run prepare-data</code> to rebuild the files in <code>public/data</code>, then reload.</p>
           </div>
         </div>
-      ) : !data ? (
-        <div className="booting">Opening the index…</div>
       ) : (
         <Routes>
-          <Route path="/" element={<Home data={data} />} />
-          <Route path="/subjects" element={<Subjects data={data} />} />
-          <Route path="/subject/:id" element={<Subject data={data} />} />
-          <Route path="/manuscripts" element={<Manuscripts data={data} />} />
-          <Route path="/manuscript/:id" element={<Manuscript data={data} />} />
-          <Route path="/figures" element={<Figures data={data} />} />
-          <Route path="/figure/:id" element={<Figure data={data} />} />
-          <Route path="/search" element={<Search data={data} />} />
+          {/* The home page runs on the shell, so it paints before the index lands. */}
+          <Route path="/" element={data || shell ? <Home data={data || shell} /> : <Booting />} />
+          <Route path="/subjects" element={indexed(data, <Subjects data={data} />)} />
+          <Route path="/subject/:id" element={indexed(data, <Subject data={data} />)} />
+          <Route path="/manuscripts" element={indexed(data, <Manuscripts data={data} />)} />
+          <Route path="/manuscript/:id" element={indexed(data, <Manuscript data={data} />)} />
+          <Route path="/figures" element={indexed(data, <Figures data={data} />)} />
+          <Route path="/figure/:id" element={indexed(data, <Figure data={data} />)} />
+          <Route path="/search" element={indexed(data, <Search data={data} />)} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       )}
     </div>
   )
+}
+
+// Everything except the home page reads the headings, so it waits for them.
+function indexed(data, element) {
+  return data ? element : <Booting />
+}
+
+function Booting() {
+  return <div className="booting">Opening the index…</div>
 }
 
 function NotFound() {
