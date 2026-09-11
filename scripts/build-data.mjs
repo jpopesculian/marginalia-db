@@ -2,6 +2,7 @@
 // four JSON files the app loads at boot. Run by `npm run dev` and `npm run build`.
 import { readFile, writeFile, mkdir, symlink, rm, stat } from 'node:fs/promises'
 import { folioKeys } from './iiif-folio.mjs'
+import { buildResolver } from './resolve-xrefs.mjs'
 
 const ROOT = new URL('..', import.meta.url)
 const read = async (p) => JSON.parse(await readFile(new URL(p, ROOT), 'utf8'))
@@ -93,6 +94,15 @@ const outManuscripts = manuscripts.map((m) => {
   }
 })
 
+// Resolve "see" and "see also" targets to ids here, so the app never renders a
+// link it cannot follow. See resolve-xrefs.mjs for how the printed conventions
+// are decoded.
+const resolveXref = buildResolver(
+  subjects.map((s) => ({ id: s.id, heading: s.heading, level: s.level, path: s.path }))
+)
+let xrefTotal = 0
+let xrefResolved = 0
+
 const childrenOf = new Map()
 for (const s of subjects) {
   if (!s.parent_id) continue
@@ -108,7 +118,15 @@ const outSubjects = subjects.map((s) => ({
   path: s.path,
   letter: s.letter,
   children: childrenOf.get(s.id) || [],
-  crossReferences: s.cross_references || [],
+  crossReferences: (s.cross_references || []).map((x) => ({
+    type: x.type,
+    targets: (x.targets || []).map((label) => {
+      xrefTotal++
+      const id = resolveXref(label, s)
+      if (id) xrefResolved++
+      return id ? { label, id } : { label }
+    }),
+  })),
   references: (s.references || []).map((r) => ({
     manuscriptId: r.manuscript_id,
     manuscript: r.manuscript,
@@ -159,6 +177,8 @@ for (const s of outSubjects) {
 
 const meta = {
   subjects: outSubjects.length,
+  crossReferences: xrefTotal,
+  crossReferencesResolved: xrefResolved,
   manuscripts: outManuscripts.length,
   figures: outFigures.length,
   manuscriptsWithIiif: Object.keys(iiif).length,

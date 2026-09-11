@@ -138,7 +138,7 @@ function entryMeta(s) {
   if (!parts.length) {
     const xref = s.crossReferences[0]
     if (xref)
-      return `${xref.type === 'see' ? 'See' : xref.type === 'see_also' ? 'See also' : 'Compare'} ${xref.targets.join('; ')}`
+      return `${xref.type === 'see' ? 'See' : xref.type === 'see_also' ? 'See also' : 'Compare'} ${xref.targets.map((t) => t.label).join('; ')}`
     return 'Recorded without citations'
   }
   return parts.join(', ')

@@ -102,15 +102,12 @@ export default function Subject({ data }) {
             {subject.crossReferences.map((x, i) => (
               <p className="xref" key={i}>
                 <span className="kind">{x.type === 'see' ? 'See' : x.type === 'see_also' ? 'See also' : 'Compare'}</span>{' '}
-                {x.targets.map((t, j) => {
-                  const target = data.resolveCrossReference(t)
-                  return (
-                    <span key={j}>
-                      {j > 0 && '; '}
-                      {target ? <Link to={href(`/subject/${target}`)}>{t}</Link> : <span>{t}</span>}
-                    </span>
-                  )
-                })}
+                {x.targets.map((t, j) => (
+                  <span key={j}>
+                    {j > 0 && '; '}
+                    {t.id ? <Link to={href(`/subject/${t.id}`)}>{t.label}</Link> : <span>{t.label}</span>}
+                  </span>
+                ))}
               </p>
             ))}
           </div>

@@ -123,16 +123,6 @@ export function loadData() {
       })
     }
 
-    // Randall's cross-references point at printed heading paths ("Virgin,
-    // miracles of: sacristan"), not ids. Resolve what we can to real links.
-    const byPathKey = new Map()
-    for (const s of subjects) {
-      const key = normalize(s.path.join(': '))
-      if (!byPathKey.has(key)) byPathKey.set(key, s.id)
-      const hkey = normalize(s.heading)
-      if (s.level === 0 && !byPathKey.has(hkey)) byPathKey.set(hkey, s.id)
-    }
-
     return {
       subjects,
       manuscripts,
@@ -151,13 +141,10 @@ export function loadData() {
       citationsByManuscript,
       figuresByManuscript,
       figuresBySubject,
-      resolveCrossReference: (target) => byPathKey.get(normalize(target)) || null,
     }
   })()
   return cache
 }
-
-const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9: ]+/g, '').replace(/\s+/g, ' ').trim()
 
 // Folios sort as scribes read them: 12r before 12v before 13r.
 export function byFolio(a, b) {

@@ -85,6 +85,30 @@ artwork created with the font, which is what the SVGs are.
 Nothing at runtime touches the font. Clone the repo without it and the capitals
 still render.
 
+## Cross-references
+
+Randall's "see" and "see also" targets are written for a reader holding the book.
+They lean on the entry you are already reading ("Abacus see Man with" means "Man
+with abacus"), they abbreviate ("David, life of: D. and"), they quote only the
+opening words of a long heading, and they say things like "Tumbler, references
+under". Matching them literally resolves about a third.
+
+`scripts/resolve-xrefs.mjs` decodes those conventions once at build time, so the
+app only ever renders a link it knows leads somewhere. Unresolved targets stay as
+plain text.
+
+| | Targets |
+|---|---|
+| Total | 5,117 |
+| Resolved | 3,332 |
+| Entries where at least one now links | 1,602 of 2,181 |
+
+Precision is the constraint, not coverage: a wrong "see" link sends a reader to
+the wrong motif, which is worse than no link. Every strategy is an exact match or
+is scoped tightly enough to be unambiguous, shallower headings win ties — three
+subjects are called "Ape with fruit" and the top-level one is what a reference
+means — and a target that resolves onto its own entry is dropped.
+
 ## Filters
 
 One filter set, held in the query string as `?f=plate,folio`, shared by every
