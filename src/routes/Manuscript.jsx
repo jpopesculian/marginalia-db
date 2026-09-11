@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Citation, Crumbs, PlateGrid } from '../components/Bits.jsx'
+import { Citation, Crumbs, FilterBar, PlateGrid } from '../components/Bits.jsx'
+import { CITATION_FILTERS, applyFilters, filterCounts, useFilterHref, useFilters } from '../filters.js'
 import { viewerUrl } from '../iiif.js'
 
 const PAGE = 150
@@ -9,8 +10,21 @@ export default function Manuscript({ data }) {
   const { id } = useParams()
   const ms = data.manuscriptById.get(decodeURIComponent(id))
   const [shown, setShown] = useState(PAGE)
+  const { active, toggle, clear } = useFilters()
+  const href = useFilterHref()
 
-  const citations = useMemo(() => (ms ? data.citationsByManuscript.get(ms.id) || [] : []), [data, ms])
+  const all = useMemo(() => (ms ? data.citationsByManuscript.get(ms.id) || [] : []), [data, ms])
+  // Citations here already carry manuscriptId implicitly; the filters need it named.
+  const withMs = useMemo(
+    () => (ms ? all.map((c) => ({ ...c, manuscriptId: ms.id })) : []),
+    [all, ms]
+  )
+  const counts = useMemo(() => filterCounts(withMs, CITATION_FILTERS, data), [withMs, data])
+  const citations = useMemo(
+    () => applyFilters(withMs, CITATION_FILTERS, active, data),
+    [withMs, active, data]
+  )
+  const filtering = citations.length !== withMs.length
 
   if (!ms) {
     return (
@@ -136,10 +150,29 @@ export default function Manuscript({ data }) {
         )}
 
         <h2 className="section-head">
-          Motifs recorded here <span className="count">({citations.length})</span>
+          Motifs recorded here{' '}
+          <span className="count">
+            ({filtering ? `${citations.length} of ${withMs.length}` : withMs.length})
+          </span>
         </h2>
-        {citations.length === 0 ? (
+
+        {withMs.length > 0 && (
+          <FilterBar
+            defs={CITATION_FILTERS}
+            active={active}
+            toggle={toggle}
+            clear={clear}
+            counts={counts}
+            label="Filter citations"
+          />
+        )}
+
+        {withMs.length === 0 ? (
           <p className="empty">Randall's index cites no motifs from this manuscript.</p>
+        ) : citations.length === 0 ? (
+          <p className="empty">
+            No citation here matches every filter. This manuscript has {withMs.length} in all.
+          </p>
         ) : (
           <>
             <ul className="citations">
@@ -156,6 +189,7 @@ export default function Manuscript({ data }) {
                     volume={c.volume}
                     subjectId={c.subjectId}
                     subjectPath={s ? s.path.join(': ') : c.subjectId}
+                    subjectHref={href(`/subject/${c.subjectId}`)}
                   />
                 )
               })}

@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { FilterBar, SubjectList } from '../components/Bits.jsx'
-import { SUBJECT_FILTERS, applyFilters, filterCounts, useFilters } from '../filters.js'
-import { useSearchParams } from 'react-router-dom'
+import { SUBJECT_FILTERS, applyFilters, filterCounts, useFilterHref, useFilters } from '../filters.js'
 
 export default function Subjects({ data }) {
   const [params] = useSearchParams()
@@ -79,12 +78,13 @@ export default function Subjects({ data }) {
 
 function Node({ data, subject }) {
   const [open, setOpen] = useState(false)
+  const href = useFilterHref()
   const kids = subject.children.map((id) => data.subjectById.get(id)).filter(Boolean)
   const total = useMemo(() => countRefs(data, subject), [data, subject])
 
   return (
     <li>
-      <Link to={`/subject/${subject.id}`} className={subject.level === 0 ? 'lvl-0' : undefined}>
+      <Link to={href(`/subject/${subject.id}`)} className={subject.level === 0 ? 'lvl-0' : undefined}>
         {subject.heading}
       </Link>
       {total > 0 && (

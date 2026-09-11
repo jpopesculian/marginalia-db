@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { searchFigures, searchManuscripts, searchSubjects } from '../data.js'
 import { FilterBar, PlateGrid, SubjectList } from '../components/Bits.jsx'
-import { SUBJECT_FILTERS, applyFilters, filterCounts, useFilters } from '../filters.js'
+import { SUBJECT_FILTERS, applyFilters, filterCounts, useFilterHref, useFilters } from '../filters.js'
 
 const SHOWN = 120
 
@@ -11,6 +11,7 @@ export default function Search({ data }) {
   const urlQ = params.get('q') || ''
   const [q, setQ] = useState(urlQ)
   const { active, toggle, clear } = useFilters()
+  const href = useFilterHref()
 
   // What this input last wrote to the URL. Without it, our own write comes back
   // round and is mistaken for the user navigating: the debounced write triggers
@@ -135,7 +136,7 @@ export default function Search({ data }) {
                 <ul className="ms-list">
                   {manuscripts.map((m) => (
                     <li key={m.id} className="ms-row">
-                      <Link className="ms-name" to={`/manuscript/${encodeURIComponent(m.id)}`}>
+                      <Link className="ms-name" to={href(`/manuscript/${encodeURIComponent(m.id)}`)}>
                         {m.id}
                       </Link>
                       <div className="ms-where">

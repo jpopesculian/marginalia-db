@@ -1,12 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FilterBar } from '../components/Bits.jsx'
-import { MANUSCRIPT_FILTERS, applyFilters, filterCounts, useFilters } from '../filters.js'
+import { MANUSCRIPT_FILTERS, applyFilters, filterCounts, useFilterHref, useFilters } from '../filters.js'
 
 export default function Manuscripts({ data }) {
   const [city, setCity] = useState('')
   const [q, setQ] = useState('')
   const { active, toggle, clear } = useFilters()
+  const href = useFilterHref()
 
   const cities = useMemo(
     () => [...new Set(data.manuscripts.map((m) => m.city).filter(Boolean))].sort(),
@@ -115,7 +116,7 @@ export default function Manuscripts({ data }) {
               const flags = data.manuscriptFlags.get(m.id)
               return (
                 <li key={m.id} className="ms-row">
-                  <Link className="ms-name" to={`/manuscript/${encodeURIComponent(m.id)}`}>
+                  <Link className="ms-name" to={href(`/manuscript/${encodeURIComponent(m.id)}`)}>
                     {m.id}
                   </Link>
                   <div className="ms-where">
@@ -123,7 +124,7 @@ export default function Manuscripts({ data }) {
                     {m.institution ? ` — ${m.institution}, ${m.city}` : ''}
                   </div>
                   <div className="ms-flags">
-                    {flags.iiif && (
+                    {flags.online && (
                       <div className="flag-iiif">{flags.folio ? 'IIIF, folio links' : 'IIIF'}</div>
                     )}
                     {cites > 0 && (

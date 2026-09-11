@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { folioLink, manuscriptLink } from '../iiif.js'
+import { useFilterHref } from '../filters.js'
 
 export function Crumbs({ items }) {
   return (
@@ -29,7 +30,19 @@ export function HeadingPath({ path }) {
 
 // One line of the index: which book, which leaf, what is drawn there, and — only
 // when a IIIF manifest exists — a way through to the leaf itself.
-export function Citation({ data, manuscriptId, manuscriptLabel, folio, note, figures, volume, subjectId, subjectPath }) {
+export function Citation({
+  data,
+  manuscriptId,
+  manuscriptLabel,
+  folio,
+  note,
+  figures,
+  volume,
+  subjectId,
+  subjectPath,
+  subjectHref,
+}) {
+  const href = useFilterHref()
   const ms = data.manuscriptById.get(manuscriptId)
   const entry = data.iiif[manuscriptId]
   const link = folio ? folioLink(entry, folio) : manuscriptLink(entry)
@@ -37,11 +50,11 @@ export function Citation({ data, manuscriptId, manuscriptLabel, folio, note, fig
   return (
     <li className="citation">
       {subjectPath ? (
-        <Link className="cite-ms" to={`/subject/${subjectId}`}>
+        <Link className="cite-ms" to={subjectHref || `/subject/${subjectId}`}>
           {subjectPath}
         </Link>
       ) : ms ? (
-        <Link className="cite-ms" to={`/manuscript/${encodeURIComponent(ms.id)}`} title={ms.shelfmark ? `${ms.shelfmark} — ${[ms.institution, ms.city].filter(Boolean).join(', ')}` : undefined}>
+        <Link className="cite-ms" to={href(`/manuscript/${encodeURIComponent(ms.id)}`)} title={ms.shelfmark ? `${ms.shelfmark} — ${[ms.institution, ms.city].filter(Boolean).join(', ')}` : undefined}>
           {ms.id}
         </Link>
       ) : (
@@ -132,6 +145,7 @@ function entryMeta(s) {
 }
 
 export function SubjectList({ data, subjects }) {
+  const href = useFilterHref()
   return (
     <ul className="entry-list">
       {subjects.map((s) => {
@@ -139,7 +153,7 @@ export function SubjectList({ data, subjects }) {
         const ancestry = s.path.slice(0, -1)
         return (
           <li key={s.id} className="entry">
-            <Link className="entry-head" to={`/subject/${s.id}`}>
+            <Link className="entry-head" to={href(`/subject/${s.id}`)}>
               {ancestry.length > 0 && (
                 <span className="entry-path">
                   {ancestry.join(' › ')}

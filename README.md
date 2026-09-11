@@ -82,24 +82,42 @@ still render.
 
 ## Filters
 
-The Motifs, Search and Manuscripts pages carry toggle filters. They multi-select,
-combine with AND, and live in the query string as `?f=plate,folio`, so a filtered
-view survives letter navigation and can be shared as a link. Counts on each
-toggle describe the current scope — the selected letter, the current query, or
-the current city and text search — not the whole database.
+One filter set, held in the query string as `?f=plate,folio`, shared by every
+page that lists things: Motifs, Search, subject pages, the manuscript list and
+manuscript pages. Internal links carry it, so a filtered browse stays filtered as
+you move between headings, manuscripts and back. Top-level navigation does not
+carry it — switching section starts clean.
 
-| Filter | Applies to | Meaning |
-|---|---|---|
-| With a plate | motifs | Reproduced in one of the 741 photographic plates |
-| Opens a folio | motifs | At least one citation resolves to a real canvas |
-| Cited in a manuscript | motifs | Has citations of its own, rather than only pointing elsewhere |
-| Images online | manuscripts | The holding library publishes a IIIF manifest |
-| Folio links | manuscripts | That manifest names its leaves |
-| With plates | manuscripts | Reproduced in at least one plate |
+Filters multi-select and combine with AND. Counts on each toggle describe the
+current scope: the selected letter, the current query, the current city, or the
+citations on the page you are reading.
+
+A shared key means the same thing everywhere; it is simply evaluated at whatever
+grain the page shows.
+
+| Key | Manuscript | Heading | Citation |
+|---|---|---|---|
+| `plate` | reproduced in a plate | reproduced in a plate | this citation is |
+| `folio` | ≥1 cited folio opens the exact leaf | ≥1 citation opens the exact leaf | this one opens it |
+| `online` | publishes a IIIF manifest | — | — |
+| `cited` | — | has citations of its own | — |
+
+Each bar offers only the keys that discriminate on that page. `cited` is absent
+from citation lists because every citation is one; `online` is absent from
+citation lists because every citation on a manuscript page shares that
+manuscript's answer. A key carried in that a page does not offer changes nothing
+and can still be cleared.
+
+`folio` is deliberately about *cited* folios, not about the manifest. Thirteen
+manuscripts publish a manifest that names leaves this index never cites; counting
+those would promise a folio link and then open nothing.
+
+A filtered page never hides the record. A subject page keeps the full printed
+index entry above its citations, headings read "Where it is drawn (19 of 72)",
+and clearing is one click.
 
 There is deliberately no literal "with a folio" filter: only 15 of 13,200
-citations lack a folio value, so it would filter nothing. *Opens a folio* carries
-that intent instead.
+citations lack a folio value, so it would filter nothing.
 
 Filtering the Motifs page flattens the hierarchy — narrower headings are what
 usually carry the plates, and they are invisible while the tree is collapsed.

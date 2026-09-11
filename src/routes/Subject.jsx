@@ -1,10 +1,12 @@
 import { Link, useParams } from 'react-router-dom'
-import { Citation, Crumbs, PlateGrid } from '../components/Bits.jsx'
-import { folioLink } from '../iiif.js'
+import { Citation, Crumbs, FilterBar, PlateGrid } from '../components/Bits.jsx'
+import { CITATION_FILTERS, applyFilters, filterCounts, useFilterHref, useFilters } from '../filters.js'
 
 export default function Subject({ data }) {
   const { id } = useParams()
   const subject = data.subjectById.get(id)
+  const { active, toggle, clear } = useFilters()
+  const href = useFilterHref()
 
   if (!subject) {
     return (
@@ -31,13 +33,21 @@ export default function Subject({ data }) {
   const namedPlates = subject.figures.map((f) => data.figureById.get(f)).filter(Boolean)
   const allPlates = [...new Map([...plates, ...namedPlates].map((f) => [f.id, f])).values()]
 
-  const citations = subject.references.flatMap((r) =>
-    r.folios.map((f) => ({ ref: r, folio: f }))
+  const all = subject.references.flatMap((r) =>
+    r.folios.map((f) => ({
+      manuscriptId: r.manuscriptId,
+      manuscriptLabel: r.manuscript,
+      volume: r.volume,
+      folio: f.folio,
+      note: f.note,
+      figures: f.figures || [],
+    }))
   )
 
-  const openable = citations.filter(
-    ({ ref, folio }) => folioLink(data.iiif[ref.manuscriptId], folio.folio)?.exact
-  ).length
+  const counts = filterCounts(all, CITATION_FILTERS, data)
+  const citations = applyFilters(all, CITATION_FILTERS, active, data)
+  const openable = counts.folio
+  const filtering = citations.length !== all.length
 
   return (
     <div className="leaf">
@@ -46,10 +56,10 @@ export default function Subject({ data }) {
         <p>
           {subject.letter} — page {subject.page ?? '—'} of the printed index.
         </p>
-        {citations.length > 0 && (
+        {all.length > 0 && (
           <>
             <p>
-              {citations.length} {citations.length === 1 ? 'citation' : 'citations'} in{' '}
+              {all.length} {all.length === 1 ? 'citation' : 'citations'} in{' '}
               {new Set(subject.references.map((r) => r.manuscriptId)).size} manuscripts.
             </p>
             <p>
@@ -70,8 +80,8 @@ export default function Subject({ data }) {
         <Crumbs
           items={[
             { label: 'Motifs', to: '/subjects' },
-            { label: subject.letter, to: `/subjects?letter=${subject.letter}` },
-            ...ancestors.map((a) => ({ label: a.heading, to: `/subject/${a.id}` })),
+            { label: subject.letter, to: href(`/subjects?letter=${subject.letter}`) },
+            ...ancestors.map((a) => ({ label: a.heading, to: href(`/subject/${a.id}`) })),
             { label: subject.heading },
           ]}
         />
@@ -97,7 +107,7 @@ export default function Subject({ data }) {
                   return (
                     <span key={j}>
                       {j > 0 && '; '}
-                      {target ? <Link to={`/subject/${target}`}>{t}</Link> : <span>{t}</span>}
+                      {target ? <Link to={href(`/subject/${target}`)}>{t}</Link> : <span>{t}</span>}
                     </span>
                   )
                 })}
@@ -112,7 +122,7 @@ export default function Subject({ data }) {
             <ul className="tree">
               {children.map((c) => (
                 <li key={c.id} style={{ paddingLeft: 0 }}>
-                  <Link to={`/subject/${c.id}`}>{c.heading}</Link>
+                  <Link to={href(`/subject/${c.id}`)}>{c.heading}</Link>
                   {c.references.length > 0 && (
                     <span className="refs">{c.references.reduce((a, r) => a + r.folios.length, 0)}</span>
                   )}
@@ -122,23 +132,46 @@ export default function Subject({ data }) {
           </>
         )}
 
-        {citations.length > 0 && (
+        {all.length > 0 && (
           <>
-            <h2 className="section-head">Where it is drawn</h2>
-            <ul className="citations">
-              {citations.map(({ ref, folio }, i) => (
-                <Citation
-                  key={i}
-                  data={data}
-                  manuscriptId={ref.manuscriptId}
-                  manuscriptLabel={ref.manuscript}
-                  folio={folio.folio}
-                  note={folio.note}
-                  figures={folio.figures}
-                  volume={ref.volume}
-                />
-              ))}
-            </ul>
+            <h2 className="section-head">
+              Where it is drawn{' '}
+              {filtering && (
+                <span className="count">
+                  ({citations.length} of {all.length})
+                </span>
+              )}
+            </h2>
+
+            <FilterBar
+              defs={CITATION_FILTERS}
+              active={active}
+              toggle={toggle}
+              clear={clear}
+              counts={counts}
+              label="Filter citations"
+            />
+
+            {citations.length === 0 ? (
+              <p className="empty">
+                No citation here matches every filter. The printed entry above lists all {all.length}.
+              </p>
+            ) : (
+              <ul className="citations">
+                {citations.map((c, i) => (
+                  <Citation
+                    key={i}
+                    data={data}
+                    manuscriptId={c.manuscriptId}
+                    manuscriptLabel={c.manuscriptLabel}
+                    folio={c.folio}
+                    note={c.note}
+                    figures={c.figures}
+                    volume={c.volume}
+                  />
+                ))}
+              </ul>
+            )}
           </>
         )}
 
@@ -149,7 +182,7 @@ export default function Subject({ data }) {
           </>
         )}
 
-        {citations.length === 0 && children.length === 0 && subject.crossReferences.length === 0 && (
+        {all.length === 0 && children.length === 0 && subject.crossReferences.length === 0 && (
           <p className="empty">Randall recorded this heading without citations of its own.</p>
         )}
       </div>

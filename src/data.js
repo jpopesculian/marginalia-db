@@ -94,10 +94,15 @@ export function loadData() {
     const manuscriptFlags = new Map()
     for (const m of manuscripts) {
       const entry = iiif[m.id]
+      const cites = citationsByManuscript.get(m.id) || []
       manuscriptFlags.set(m.id, {
-        iiif: !!entry,
-        folio: !!entry && Object.keys(entry.folios).length > 0,
-        plates: figuresByManuscript.has(m.id),
+        online: !!entry,
+        // The same test the citation and heading filters use, lifted one level:
+        // a manuscript opens a folio when at least one folio Randall cites
+        // resolves to a canvas. A foliated manifest alone is not enough — 13 of
+        // them name leaves that this index never cites.
+        folio: !!entry && cites.some((c) => folioLink(entry, c.folio)?.exact),
+        plate: figuresByManuscript.has(m.id),
       })
     }
 

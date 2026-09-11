@@ -1,9 +1,11 @@
 import { Link, useParams } from 'react-router-dom'
 import { Crumbs, plateAlt } from '../components/Bits.jsx'
+import { useFilterHref } from '../filters.js'
 import { folioLink, manuscriptLink } from '../iiif.js'
 
 export default function Figure({ data }) {
   const { id } = useParams()
+  const href = useFilterHref()
   const fig = data.figureById.get(id)
 
   if (!fig) {
@@ -86,7 +88,7 @@ export default function Figure({ data }) {
             <ul className="entry-list">
               {subjects.map((s) => (
                 <li key={s.id} className="entry">
-                  <Link className="entry-head" to={`/subject/${s.id}`}>
+                  <Link className="entry-head" to={href(`/subject/${s.id}`)}>
                     {s.path.join(': ')}
                   </Link>
                   <div className="entry-meta">
