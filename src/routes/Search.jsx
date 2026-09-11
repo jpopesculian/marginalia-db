@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { searchFigures, searchManuscripts, searchSubjects } from '../data.js'
 import { FilterBar, PlateGrid, SubjectList } from '../components/Bits.jsx'
@@ -8,24 +8,43 @@ const SHOWN = 120
 
 export default function Search({ data }) {
   const [params, setParams] = useSearchParams()
-  const [q, setQ] = useState(params.get('q') || '')
+  const urlQ = params.get('q') || ''
+  const [q, setQ] = useState(urlQ)
   const { active, toggle, clear } = useFilters()
 
+  // What this input last wrote to the URL. Without it, our own write comes back
+  // round and is mistaken for the user navigating: the debounced write triggers
+  // a re-render long enough for more keystrokes to land, and adopting the URL
+  // afterwards silently discards them.
+  const pushed = useRef(urlQ)
+
+  // Adopt the URL only when it changed for some other reason — back, forward, or
+  // an inbound link. Keyed on the string, so toggling a filter does not reset it.
   useEffect(() => {
-    setQ(params.get('q') || '')
-  }, [params])
+    if (urlQ === pushed.current) return
+    pushed.current = urlQ
+    setQ(urlQ)
+  }, [urlQ])
 
   useEffect(() => {
+    const next = q.trim()
+    if (next === pushed.current) return
     const t = setTimeout(() => {
-      const next = q.trim()
-      if (next === (params.get('q') || '')) return
-      const p = new URLSearchParams(params)
-      if (next) p.set('q', next)
-      else p.delete('q')
-      setParams(p, { replace: true })
+      pushed.current = next
+      // Merge into whatever the params are when this fires; a filter toggled
+      // during the debounce must not be dropped.
+      setParams(
+        (prev) => {
+          const p = new URLSearchParams(prev)
+          if (next) p.set('q', next)
+          else p.delete('q')
+          return p
+        },
+        { replace: true }
+      )
     }, 200)
     return () => clearTimeout(t)
-  }, [q])
+  }, [q, setParams])
 
   const term = (params.get('q') || '').trim()
   const allSubjects = useMemo(() => searchSubjects(data, term), [data, term])

@@ -954,6 +954,12 @@ button {
     align-items: flex-start;
   }
 
+  /* The note's 14rem flex-basis is a minimum *width* for the row layout. Once the
+     main axis is vertical it would become a 14rem tall void above the links. */
+  .cite-note {
+    flex: none;
+  }
+
   .cite-actions {
     margin-left: 0;
   }
