@@ -43,10 +43,29 @@ manuscript-level link and the interface says why.
 
 | | |
 |---|---|
-| Manifests indexed | 149 of 151 |
-| Manifests with folio labels | 95 |
+| Manifests indexed | 151 of 151 |
+| Manifests with folio labels | 98 |
 | Manuscripts openable | 126 of 232 |
-| Citations that open the exact leaf | 3,859 of 13,200 |
+| Citations that open the exact leaf | 4,206 of 13,200 |
+
+Most labels are Arabic, but Gallica foliates some manuscripts in Roman — `Ir`,
+`Iv`, … `CLXIIIv`. Those are read per manifest rather than per label, because
+`v` is both the numeral five and the verso mark: `Iv` is one-verso in a manifest
+that also contains `Ir`, and four in one that does not. The resulting sequence
+must run forwards or the manifest is rejected, since labels that are not really
+folios would otherwise link to the wrong leaf.
+
+Where the remaining citations go unlinked:
+
+| Reason | Manifests |
+|---|---|
+| Labels are image counters — "Page 204", "Seq. 322", "View 398", plain "1" | 42 |
+| Labels carry no folio at all — "NP", an empty "f.", a title | 7 |
+| Roman foliation | fixed |
+
+An image counter cannot be turned into a folio without a foliation table the
+library does not publish, and guessing an offset would link confidently to the
+wrong page.
 
 Links open the [Universal Viewer](https://universalviewer.dev) with the manifest
 and, where resolved, a `cv` canvas index.

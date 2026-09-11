@@ -1,5 +1,24 @@
 // Shared helpers for turning IIIF canvas labels into folio deep-link tokens.
 
+// Some libraries foliate in Roman numerals — Gallica labels fr. 25526 as
+// "Ir", "Iv", … "LXXXVv" — and Randall occasionally cites them that way too.
+// Strict form only: subtractive pairs, descending groups, no more than three
+// repeats. Loose parsing would turn ordinary words into numbers.
+const ROMAN = /^(m{0,4})(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$/i
+const ROMAN_VALUES = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 }
+
+export function romanToInt(raw) {
+  const s = String(raw || '').toLowerCase()
+  if (!s || !ROMAN.test(s)) return null
+  let total = 0
+  for (let i = 0; i < s.length; i++) {
+    const v = ROMAN_VALUES[s[i]]
+    const next = ROMAN_VALUES[s[i + 1]]
+    total += next > v ? -v : v
+  }
+  return total || null
+}
+
 // Randall cites folios as "109", "63v", "201v-202", "149v-151".
 // A bare number means recto. Ranges resolve to their first member.
 export function normalizeFolio(raw) {
@@ -34,6 +53,51 @@ export function tokensFromLabel(label) {
   return out
 }
 
+// Roman foliation, decided across the whole manifest rather than label by label.
+// "v" is both the numeral five and the verso mark, so a single label cannot be
+// read in isolation: "Iv" is one-verso in a manifest that also contains "Ir",
+// and four in one that does not. Gallica foliates fr. 25526 this way.
+function romanTokens(labels) {
+  const cleaned = labels.map((l) =>
+    String(l ?? '').trim().toLowerCase().replace(/\bff?ol?\.?\s*/g, '')
+  )
+  // A recto mark is unambiguous — "r" is not a numeral — so its presence is what
+  // tells us this manifest marks sides at all.
+  const usesSides = cleaned.some((t) => {
+    const p = t.match(/^([ivxlcdm]+)r$/)
+    return p && romanToInt(p[1]) !== null
+  })
+
+  const out = cleaned.map((t) => {
+    // With sides in play the trailing letter is the side, so it must be split
+    // off before parsing: "iv" is one-verso here, not four.
+    if (usesSides) {
+      const withSide = t.match(/^([ivxlcdm]+)([rv])$/)
+      if (withSide) {
+        const n = romanToInt(withSide[1])
+        if (n !== null) return [{ num: String(n), side: withSide[2] }]
+      }
+    }
+    const n = romanToInt(t)
+    return n === null ? [] : [{ num: String(n), side: null }]
+  })
+
+  // Guard: a real foliation only ever runs forwards. Anything else means the
+  // labels are not folio numbers and reading them as such would link to the
+  // wrong leaf.
+  let last = 0
+  let seen = 0
+  for (const toks of out) {
+    for (const t of toks) {
+      const n = Number(t.num)
+      if (n < last) return null
+      last = n
+      seen++
+    }
+  }
+  return seen >= 10 ? out : null
+}
+
 export function canvasLabel(canvas) {
   const l = canvas.label
   if (l == null) return null
@@ -63,8 +127,17 @@ export function manifestCanvases(doc) {
 // linking by folio would silently point at the wrong page.
 export function indexManifest(doc) {
   const canvases = manifestCanvases(doc)
-  const parsed = canvases.map((c) => tokensFromLabel(canvasLabel(c)))
-  const foliated = parsed.some((toks) => toks.some((t) => t.side))
+  const labels = canvases.map((c) => canvasLabel(c))
+  let parsed = labels.map((l) => tokensFromLabel(l))
+  let foliated = parsed.some((toks) => toks.some((t) => t.side))
+
+  if (!foliated) {
+    const roman = romanTokens(labels)
+    if (roman) {
+      parsed = roman
+      foliated = roman.some((toks) => toks.some((t) => t.side))
+    }
+  }
   const folios = {}
   if (foliated) {
     parsed.forEach((toks, i) => {

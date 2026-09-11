@@ -1,7 +1,7 @@
 // Spot-check: for a sample of resolved citations, refetch the manifest and confirm
 // the canvas at the index we link to really carries the cited folio.
 import { readFile } from 'node:fs/promises'
-import { canvasLabel, folioKeys, manifestCanvases } from './iiif-folio.mjs'
+import { canvasLabel, folioKeys, manifestCanvases, romanToInt } from './iiif-folio.mjs'
 
 const R = new URL('../', import.meta.url).pathname
 const subjects = JSON.parse(await readFile(R + 'public/data/subjects.json', 'utf8'))
@@ -33,7 +33,17 @@ for (const s of samples) {
     const label = canvasLabel(manifestCanvases(doc)[s.cv])
     const norm = String(label || '').toLowerCase().replace(/\s+/g, '')
     const want = s.key.replace(/\s+/g, '')
-    const ok = norm.includes(want) || norm.includes(want.replace(/r$/, ''))
+    // Some libraries foliate in Roman, so "45r" has to be matched against "xlvr".
+    const asRoman = (() => {
+      const m = norm.replace(/\bff?ol?\.?/g, '').match(/^([ivxlcdm]+)([rv])?$/)
+      if (!m) return null
+      const n = romanToInt(m[2] ? m[1] : norm) ?? romanToInt(m[1])
+      return n === null ? null : `${n}${m[2] || ''}`
+    })()
+    const ok =
+      norm.includes(want) ||
+      norm.includes(want.replace(/r$/, '')) ||
+      (asRoman !== null && (asRoman === want || asRoman === want.replace(/r$/, '')))
     if (ok) pass++
     console.log(`${ok ? 'OK  ' : 'BAD '} ${s.ms.padEnd(20)} cited f.${s.folio.padEnd(10)} -> cv=${String(s.cv).padEnd(4)} label="${label}"  [${s.provider}]`)
   } catch (e) {
